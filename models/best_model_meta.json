@@ -1,0 +1,7 @@
+{
+  "backbone": "convnext_tiny.fb_in22k_ft_in1k",
+  "img_size": 288,
+  "head_dim": 512,
+  "name": "convnext_tiny_288",
+  "checkpoint": "convnext_tiny_288.pth"
+}

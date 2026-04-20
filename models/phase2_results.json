@@ -1,0 +1,72 @@
+{
+  "all_models": [
+    {
+      "name": "convnext_tiny_288",
+      "backbone": "convnext_tiny.fb_in22k_ft_in1k",
+      "img_size": 288,
+      "head_dim": 512,
+      "save_path": "C:\\Users\\Ignacio\\Desktop\\Master_2\\ML_2\\practica_final\\models\\convnext_tiny_288.pth",
+      "val_acc": 0.9731,
+      "test_acc": 0.962
+    },
+    {
+      "name": "swin_tiny_224",
+      "backbone": "swin_tiny_patch4_window7_224.ms_in22k_ft_in1k",
+      "img_size": 224,
+      "head_dim": 512,
+      "save_path": "C:\\Users\\Ignacio\\Desktop\\Master_2\\ML_2\\practica_final\\models\\swin_tiny_224.pth",
+      "val_acc": 0.9640718562874252,
+      "test_acc": 0.956140350877193,
+      "test_tta_acc": 0.956140350877193,
+      "macro_f1": 0.9596358651745894
+    },
+    {
+      "name": "convnext_small_288",
+      "backbone": "convnext_small.fb_in22k_ft_in1k",
+      "img_size": 288,
+      "head_dim": 512,
+      "save_path": "C:\\Users\\Ignacio\\Desktop\\Master_2\\ML_2\\practica_final\\models\\convnext_small_288.pth",
+      "val_acc": 0.9775449101796407,
+      "test_acc": 0.9634502923976608,
+      "test_tta_acc": 0.9692982456140351,
+      "macro_f1": 0.9666175490061483
+    }
+  ],
+  "new_results": [
+    {
+      "name": "swin_tiny_224",
+      "backbone": "swin_tiny_patch4_window7_224.ms_in22k_ft_in1k",
+      "img_size": 224,
+      "head_dim": 512,
+      "save_path": "C:\\Users\\Ignacio\\Desktop\\Master_2\\ML_2\\practica_final\\models\\swin_tiny_224.pth",
+      "val_acc": 0.9640718562874252,
+      "test_acc": 0.956140350877193,
+      "test_tta_acc": 0.956140350877193,
+      "macro_f1": 0.9596358651745894
+    },
+    {
+      "name": "convnext_small_288",
+      "backbone": "convnext_small.fb_in22k_ft_in1k",
+      "img_size": 288,
+      "head_dim": 512,
+      "save_path": "C:\\Users\\Ignacio\\Desktop\\Master_2\\ML_2\\practica_final\\models\\convnext_small_288.pth",
+      "val_acc": 0.9775449101796407,
+      "test_acc": 0.9634502923976608,
+      "test_tta_acc": 0.9692982456140351,
+      "macro_f1": 0.9666175490061483
+    }
+  ],
+  "best_single": "convnext_small_288",
+  "best_ensemble": {
+    "indices": [
+      0,
+      2
+    ],
+    "names": [
+      "convnext_tiny_288",
+      "convnext_small_288"
+    ],
+    "acc": 0.9736842105263158,
+    "f1": 0.9762102574296103
+  }
+}

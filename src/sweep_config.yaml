@@ -1,0 +1,92 @@
+# W&B Sweep Configuration
+# ──────────────────────────────────────────────────────────────────────
+# Launch with:
+#   wandb sweep src/sweep_config.yaml
+#   wandb agent <SWEEP_ID>
+# ──────────────────────────────────────────────────────────────────────
+
+program: src/train.py
+method: bayes          # bayes | grid | random
+metric:
+  name: val/accuracy
+  goal: maximize
+
+parameters:
+  backbone:
+    values:
+      - efficientnet_b0
+      - resnet50
+      - mobilenetv2_100
+
+  learning_rate:
+    distribution: log_uniform_values
+    min: 1e-5
+    max: 1e-2
+
+  dropout:
+    values:
+      - 0.2
+      - 0.3
+      - 0.4
+      - 0.5
+
+  optimizer:
+    values:
+      - adam
+      - adamw
+      - sgd
+
+  weight_decay:
+    distribution: log_uniform_values
+    min: 1e-6
+    max: 1e-2
+
+  freeze_backbone:
+    values:
+      - true
+      - false
+
+  unfreeze_last_n:
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
+
+  batch_size:
+    values:
+      - 16
+      - 32
+      - 64
+
+  scheduler:
+    values:
+      - cosine
+      - step
+      - none
+
+  augmentation:
+    values:
+      - light
+      - medium
+      - heavy
+
+  head_hidden_dim:
+    values:
+      - 128
+      - 256
+      - 512
+
+  head_num_layers:
+    values:
+      - 1
+      - 2
+
+  epochs:
+    value: 25
+
+command:
+  - ${env}
+  - python
+  - ${program}
+  - --sweep
