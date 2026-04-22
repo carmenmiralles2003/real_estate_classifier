@@ -13,12 +13,11 @@ env/
 .venv/
 
 # Data
-data/raw/
-data/processed/
+
 *.zip
 *.tar.gz
 
-# Models
+# Models (weights are too large for git)
 models/*.pth
 models/*.pt
 
@@ -33,6 +32,10 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+__MACOSX/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Streamlit
+.streamlit/

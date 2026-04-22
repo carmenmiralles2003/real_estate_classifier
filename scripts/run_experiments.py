@@ -12,7 +12,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
-from torch.amp import autocast, GradScaler
+from torch.amp import autocast
+try:
+    from torch.amp import GradScaler
+except ImportError:
+    from torch.cuda.amp import GradScaler
 import wandb
 
 from src.config import (

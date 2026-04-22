@@ -26,7 +26,11 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import LambdaLR
-from torch.amp import autocast, GradScaler
+from torch.amp import autocast
+try:
+    from torch.amp import GradScaler
+except ImportError:
+    from torch.cuda.amp import GradScaler
 import timm
 import wandb
 

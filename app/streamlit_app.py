@@ -24,7 +24,7 @@ st.set_page_config(
     layout="centered",
 )
 
-API_URL = st.sidebar.text_input("API URL", value=os.getenv("API_URL", "http://localhost:8001"))
+API_URL = st.sidebar.text_input("API URL", value=os.getenv("API_URL", "http://localhost:8000"))
 
 
 def fmt_metric(value):

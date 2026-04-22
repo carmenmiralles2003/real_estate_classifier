@@ -126,12 +126,31 @@ def set_active_model(meta):
         loaded_model.to(device)
         loaded_model.eval()
         model = loaded_model
-    except Exception:
-        model = load_model_for_inference(
-            checkpoint_path=str(checkpoint_path),
-            backbone=backbone,
-            device=str(device),
-        )
+    except Exception as primary_err:
+        # Fallback: try loading with build_model using matching head params
+        try:
+            from src.model import build_model
+            loaded_model = build_model(
+                backbone=backbone,
+                num_classes=NUM_CLASSES,
+                pretrained=False,
+                freeze_backbone=False,
+                dropout=0.0,
+                head_hidden_dim=head_dim,
+                head_num_layers=2,
+            )
+            state = torch.load(str(checkpoint_path), map_location=str(device), weights_only=True)
+            loaded_model.load_state_dict(state)
+            loaded_model.to(device)
+            loaded_model.eval()
+            model = loaded_model
+        except Exception:
+            # Last resort: standard load
+            model = load_model_for_inference(
+                checkpoint_path=str(checkpoint_path),
+                backbone=backbone,
+                device=str(device),
+            )
 
     model_name = meta["name"]
     model_backbone = backbone

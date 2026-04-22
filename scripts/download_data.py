@@ -1,142 +1,95 @@
 """
-Download and prepare the real-estate image dataset.
+Prepare the scene-classification dataset.
 
-Option 1 — Kaggle (recommended):
-    pip install kaggle
-    export KAGGLE_USERNAME=<your_user>
-    export KAGGLE_KEY=<your_key>
-    python scripts/download_data.py --kaggle
+The professor provides the raw images in dataset/dataset/ with two sub-folders:
+    dataset/dataset/training/<class>/   (2 985 images)
+    dataset/dataset/validation/<class>/ (1 500 images)
 
-Option 2 — Manual:
-    Place images in data/raw/<class_name>/ and run:
-    python scripts/download_data.py --split-only
+This script:
+    1. Merges both folders into data/raw/<class>/  (one flat ImageFolder).
+    2. Splits the merged data 70 / 15 / 15 into data/processed/{train,val,test}.
 
-Classes expected: bathroom, bedroom, dining_room, exterior, kitchen, living_room
+Usage:
+    python scripts/download_data.py            # merge + split (default)
+    python scripts/download_data.py --split-only  # only re-split data/raw → data/processed
 """
 import argparse
-import os
-import zipfile
+import shutil
 from pathlib import Path
 
 # Add project root to path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.config import RAW_DATA_DIR, PROCESSED_DATA_DIR
+from src.config import RAW_DATA_DIR, PROCESSED_DATA_DIR, PROJECT_ROOT
 from src.dataset import split_dataset
 
+# Location of the professor's original dataset
+DATASET_DIR = PROJECT_ROOT / "dataset" / "dataset"
 
-def download_kaggle_dataset():
+
+def merge_dataset_folders():
     """
-    Downloads the 'House Rooms Image Dataset' from Kaggle.
-    Requires KAGGLE_USERNAME and KAGGLE_KEY env vars or ~/.kaggle/kaggle.json.
+    Merge dataset/dataset/training/ and dataset/dataset/validation/
+    into data/raw/<class>/, preserving the original class folder names.
     """
-    try:
-        from kaggle.api.kaggle_api_extended import KaggleApi
-    except ImportError:
-        print("Install kaggle: pip install kaggle")
-        return False
+    source_dirs = [DATASET_DIR / "training", DATASET_DIR / "validation"]
 
-    api = KaggleApi()
-    api.authenticate()
+    for src in source_dirs:
+        if not src.exists():
+            raise FileNotFoundError(
+                f"Expected source folder not found: {src}\n"
+                "Make sure the professor's dataset is placed in dataset/dataset/ "
+                "with training/ and validation/ sub-folders."
+            )
 
-    dataset_slug = "robinreni/house-rooms-image-dataset"
-    download_dir = RAW_DATA_DIR.parent
-
-    print(f"Downloading {dataset_slug} → {download_dir}")
-    api.dataset_download_files(dataset_slug, path=str(download_dir), unzip=False)
-
-    # Unzip
-    zip_path = download_dir / "house-rooms-image-dataset.zip"
-    if zip_path.exists():
-        print("Extracting...")
-        with zipfile.ZipFile(zip_path, "r") as z:
-            z.extractall(download_dir)
-        zip_path.unlink()
-
-    # Reorganize into expected structure if needed
-    _reorganize_kaggle_data(download_dir)
-    return True
-
-
-def _reorganize_kaggle_data(download_dir: Path):
-    """
-    Reorganize the Kaggle download into data/raw/<class>/
-    The Kaggle dataset often has a nested structure — adapt as needed.
-    """
-    import shutil
-
-    # Common Kaggle structure: House_Rooms/Bathroom/, House_Rooms/Bedroom/, etc.
-    possible_roots = list(download_dir.glob("**/House*Rooms*")) + \
-                     list(download_dir.glob("**/house*room*"))
-
-    if not possible_roots:
-        # Data may already be in the right place
-        if RAW_DATA_DIR.exists() and any(RAW_DATA_DIR.iterdir()):
-            print("Data already in expected location.")
-            return
-        print("WARNING: Could not find expected folder structure. "
-              "Please manually organize images into data/raw/<class_name>/")
-        return
-
-    source_root = possible_roots[0]
+    # Clean previous raw data to avoid stale files
+    if RAW_DATA_DIR.exists():
+        shutil.rmtree(RAW_DATA_DIR)
     RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Map common folder names to our class names
-    name_map = {
-        "bathroom": "bathroom",
-        "bedroom": "bedroom",
-        "dining": "dining_room",
-        "dining_room": "dining_room",
-        "dining room": "dining_room",
-        "exterior": "exterior",
-        "front": "exterior",
-        "kitchen": "kitchen",
-        "living": "living_room",
-        "living_room": "living_room",
-        "living room": "living_room",
-        "livingroom": "living_room",
-    }
+    total_copied = 0
+    for src in source_dirs:
+        class_dirs = sorted([d for d in src.iterdir() if d.is_dir()])
+        for class_dir in class_dirs:
+            dest_class = RAW_DATA_DIR / class_dir.name
+            dest_class.mkdir(parents=True, exist_ok=True)
+            images = [
+                f for f in class_dir.iterdir()
+                if f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")
+            ]
+            for img in images:
+                shutil.copy2(img, dest_class / img.name)
+                total_copied += 1
 
-    for subdir in source_root.iterdir():
-        if subdir.is_dir():
-            key = subdir.name.lower().strip()
-            target_name = name_map.get(key, key.replace(" ", "_"))
-            target_dir = RAW_DATA_DIR / target_name
-            if target_dir.exists():
-                # Merge
-                for f in subdir.iterdir():
-                    if f.is_file():
-                        shutil.copy2(f, target_dir / f.name)
-            else:
-                shutil.copytree(subdir, target_dir)
-
-    print(f"Data reorganized into {RAW_DATA_DIR}")
+    print(f"Merged {total_copied} images into {RAW_DATA_DIR}")
     for d in sorted(RAW_DATA_DIR.iterdir()):
         if d.is_dir():
-            count = len(list(d.glob("*")))
+            count = len([f for f in d.iterdir() if f.is_file()])
             print(f"  {d.name}: {count} images")
+
+    return total_copied
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download and prepare dataset")
-    parser.add_argument("--kaggle", action="store_true", help="Download from Kaggle")
-    parser.add_argument("--split-only", action="store_true", help="Skip download, only split data/raw → data/processed")
+    parser = argparse.ArgumentParser(description="Prepare dataset (merge + split)")
+    parser.add_argument(
+        "--split-only", action="store_true",
+        help="Skip merge, only re-split data/raw → data/processed",
+    )
     args = parser.parse_args()
 
-    if args.kaggle:
-        success = download_kaggle_dataset()
-        if not success:
-            return
+    if not args.split_only:
+        print("Step 1: Merging training + validation → data/raw/ ...")
+        merge_dataset_folders()
 
-    if args.split_only or args.kaggle:
-        print("\nSplitting dataset into train/val/test...")
-        split_dataset(source_dir=RAW_DATA_DIR, dest_dir=PROCESSED_DATA_DIR)
-        print("Done!")
-    else:
-        print("Usage:")
-        print("  python scripts/download_data.py --kaggle       # Download from Kaggle + split")
-        print("  python scripts/download_data.py --split-only   # Just split existing data/raw/")
+    # Clean previous processed data
+    if PROCESSED_DATA_DIR.exists():
+        shutil.rmtree(PROCESSED_DATA_DIR)
+
+    print("\nStep 2: Splitting data/raw → data/processed (70/15/15) ...")
+    split_dataset(source_dir=RAW_DATA_DIR, dest_dir=PROCESSED_DATA_DIR)
+    print("Done!")
 
 
 if __name__ == "__main__":
