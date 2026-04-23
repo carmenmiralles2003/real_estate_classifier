@@ -17,10 +17,6 @@ env/
 *.zip
 *.tar.gz
 
-# Models (weights are too large for git)
-models/*.pth
-models/*.pt
-
 # W&B
 wandb/
 
