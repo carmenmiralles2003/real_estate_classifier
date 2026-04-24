@@ -39,8 +39,7 @@ For production, we recommend deploying **ConvNeXt-Small with TTA** as the main m
 
 ## Demo
 
-https://github.com/user-attachments/assets/Test_videocam_classifier.mp4
-
+https://github.com/carmenmiralles2003/real_estate_classifier/blob/main/Test_videocam_classifier.mp4
 ---
 
 ## Project Structure
@@ -100,7 +99,7 @@ practica_ml2_sucio/
 ```powershell
 # 1. Install Git LFS from https://git-lfs.com, then:
 git lfs install
-git clone https://github.com/nachomgf/real-estate-classifier
+git clone https://github.com/carmenmiralles2003/real_estate_classifier
 cd real-estate-classifier
 git lfs pull   # downloads .pth model files
 
