@@ -37,7 +37,7 @@ For production, we recommend deploying **ConvNeXt-Small with TTA** as the main m
 
 ---
 
-[Ver demo](https://github.com/carmenmiralles2003/real_estate_classifier/blob/main/Test_videocam_classifier.mp4)
+[Watch demo](https://github.com/carmenmiralles2003/real_estate_classifier/blob/main/Test_videocam_classifier.mp4)
 ---
 
 ## Project Structure
